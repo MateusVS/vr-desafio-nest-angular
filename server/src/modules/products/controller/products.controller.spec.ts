@@ -5,6 +5,7 @@ import { Product } from '../entity/product.entity';
 import { CreateProductDTO } from '../dtos/create-product.dto';
 import { UpdateProductDTO } from '../dtos/update-product.dto';
 import { NotFoundException } from '@nestjs/common';
+import { ProductFilterDto } from '../dtos/products-filter.dto';
 
 describe('ProductsController', () => {
   let controller: ProductsController;
@@ -51,14 +52,32 @@ describe('ProductsController', () => {
   });
 
   describe('findAll', () => {
-    it('should return an array of products', async () => {
-      const products: Product[] = [mockProduct];
-      jest.spyOn(service, 'findAllProducts').mockResolvedValue(products);
+    it('should return filtered products when filters are provided', async () => {
+      const filters: ProductFilterDto = {
+        id: 1,
+        description: 'Test',
+        cost: 100.0,
+      };
 
-      const result = await controller.findAll();
+      const filteredProducts: Product[] = [mockProduct];
+      jest
+        .spyOn(service, 'findAllProducts')
+        .mockResolvedValue(filteredProducts);
 
-      expect(result).toEqual(products);
-      expect(service.findAllProducts).toHaveBeenCalled();
+      const result = await controller.findAll(filters);
+
+      expect(result).toEqual(filteredProducts);
+      expect(service.findAllProducts).toHaveBeenCalledWith(filters);
+    });
+
+    it('should return all products when no filters are provided', async () => {
+      const allProducts: Product[] = [mockProduct];
+      jest.spyOn(service, 'findAllProducts').mockResolvedValue(allProducts);
+
+      const result = await controller.findAll({});
+
+      expect(result).toEqual(allProducts);
+      expect(service.findAllProducts).toHaveBeenCalledWith({});
     });
   });
 

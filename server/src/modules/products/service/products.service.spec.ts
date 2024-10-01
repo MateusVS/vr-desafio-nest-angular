@@ -6,6 +6,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { CreateProductDTO } from '../dtos/create-product.dto';
 import { UpdateProductDTO } from '../dtos/update-product.dto';
+import { ProductFilterDto } from '../dtos/products-filter.dto';
 
 describe('ProductsService', () => {
   let service: ProductsService;
@@ -24,8 +25,14 @@ describe('ProductsService', () => {
     updatedAt: mockDate,
   };
 
+  const mockQueryBuilder = {
+    leftJoinAndSelect: jest.fn().mockReturnThis(),
+    andWhere: jest.fn().mockReturnThis(),
+    getMany: jest.fn(),
+  };
+
   const mockRepository = {
-    find: jest.fn(),
+    createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
     findOne: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
@@ -53,14 +60,35 @@ describe('ProductsService', () => {
   });
 
   describe('findAllProducts', () => {
-    it('should return an array of products', async () => {
-      const products: Product[] = [mockProduct];
-      jest.spyOn(repository, 'find').mockResolvedValue(products);
+    it('should apply all filters when provided', async () => {
+      const filters: ProductFilterDto = {
+        id: 1,
+        description: 'Test',
+        cost: 100.0,
+      };
 
-      const result = await service.findAllProducts();
+      await service.findAllProducts(filters);
 
-      expect(result).toEqual(products);
-      expect(repository.find).toHaveBeenCalled();
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'product.id = :id',
+        { id: filters.id },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'product.description ILIKE :description',
+        {
+          description: `%${filters.description}%`,
+        },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'product.cost = :cost',
+        { cost: filters.cost },
+      );
+    });
+
+    it('should not apply filters when none are provided', async () => {
+      await service.findAllProducts({});
+
+      expect(mockQueryBuilder.andWhere).not.toHaveBeenCalled();
     });
   });
 
