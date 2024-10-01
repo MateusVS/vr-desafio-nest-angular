@@ -16,6 +16,7 @@ import { AppService } from './app.service';
       username: process.env.DB_USERNAME,
       entities: [`${__dirname}/**/*.entity{.js,.ts}`],
       migrations: [`${__dirname}/database/migrations/{.ts,*.js}`],
+      synchronize: false,
       migrationsRun: true,
     }),
   ],
