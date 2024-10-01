@@ -1,6 +1,10 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class UpdateProductDTO {
+export class ProductFilterDto {
+  @IsNumber()
+  @IsOptional()
+  id?: number;
+
   @IsString()
   @IsOptional()
   description?: string;
@@ -8,8 +12,4 @@ export class UpdateProductDTO {
   @IsNumber()
   @IsOptional()
   cost?: number;
-
-  @IsString()
-  @IsOptional()
-  image?: string;
 }

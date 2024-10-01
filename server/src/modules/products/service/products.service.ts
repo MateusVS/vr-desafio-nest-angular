@@ -4,6 +4,7 @@ import { Product } from '../entity/product.entity';
 import { Repository } from 'typeorm';
 import { CreateProductDTO } from '../dtos/create-product.dto';
 import { UpdateProductDTO } from '../dtos/update-product.dto';
+import { ProductFilterDto } from '../dtos/products-filter.dto';
 
 @Injectable()
 export class ProductsService {
@@ -12,8 +13,26 @@ export class ProductsService {
     private repository: Repository<Product>,
   ) {}
 
-  async findAllProducts(): Promise<Product[]> {
-    return await this.repository.find();
+  async findAllProducts(filters?: ProductFilterDto): Promise<Product[]> {
+    const query = this.repository.createQueryBuilder('product');
+
+    if (filters) {
+      if (filters.id) {
+        query.andWhere('product.id = :id', { id: filters.id });
+      }
+
+      if (filters.description) {
+        query.andWhere('product.description ILIKE :description', {
+          description: `%${filters.description}%`,
+        });
+      }
+
+      if (filters.cost) {
+        query.andWhere('product.cost = :cost', { cost: filters.cost });
+      }
+    }
+
+    return await query.getMany();
   }
 
   async createProduct(data: CreateProductDTO): Promise<Product> {

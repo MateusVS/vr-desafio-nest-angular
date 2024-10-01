@@ -7,11 +7,13 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from '../service/products.service';
 import { Product } from '../entity/product.entity';
 import { CreateProductDTO } from '../dtos/create-product.dto';
 import { UpdateProductDTO } from '../dtos/update-product.dto';
+import { ProductFilterDto } from '../dtos/products-filter.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -19,8 +21,8 @@ export class ProductsController {
 
   @Get()
   @HttpCode(200)
-  async findAll(): Promise<Product[]> {
-    return await this.productsService.findAllProducts();
+  async findAll(@Query() filters: ProductFilterDto): Promise<Product[]> {
+    return await this.productsService.findAllProducts(filters);
   }
 
   @Post()
