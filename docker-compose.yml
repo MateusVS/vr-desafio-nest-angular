@@ -12,17 +12,17 @@ services:
     build: ./server
     ports:
       - "3000:3000"
-    environment:
-      - DATABASE_URL=postgres://user:password@db:5432/mydatabase
+    env_file:
+      - .env
     depends_on:
       - db
 
   db:
     image: postgres:17
     environment:
-      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_DB=${DB_DATABASE}
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
