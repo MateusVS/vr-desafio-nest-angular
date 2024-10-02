@@ -16,9 +16,9 @@ import { PaginationService } from '../../commom/services/pagination.service';
 describe('ProductsService', () => {
   let service: ProductsService;
   let repository: Repository<Product>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let paginationService: PaginationService;
 
-  const mockDate = new Date();
   const mockImageString = 'test-image-data';
   const mockImageBuffer = Buffer.from(mockImageString);
 
@@ -27,8 +27,8 @@ describe('ProductsService', () => {
     description: 'Test Product',
     cost: 100.0,
     image: mockImageBuffer,
-    createdAt: mockDate,
-    updatedAt: mockDate,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
   const mockQueryBuilder = {

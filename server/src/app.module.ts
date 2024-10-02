@@ -5,6 +5,7 @@ import { ProductsModule } from './modules/products/products.module';
 import { dataSourceOptions } from './database/data-source';
 import { PaginationService } from './modules/commom/services/pagination.service';
 import { CommonModule } from './modules/commom/commom.module';
+import { StoresModule } from './modules/stores/stores.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CommonModule } from './modules/commom/commom.module';
     TypeOrmModule.forRoot(dataSourceOptions),
     CommonModule,
     ProductsModule,
+    StoresModule,
   ],
   providers: [PaginationService],
   exports: [PaginationService],
