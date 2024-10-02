@@ -5,15 +5,22 @@ import { Repository } from 'typeorm';
 import { CreateProductDTO } from '../dtos/create-product.dto';
 import { UpdateProductDTO } from '../dtos/update-product.dto';
 import { ProductFilterDto } from '../dtos/products-filter.dto';
+import { PaginationService } from '../../commom/services/pagination.service';
+import { PaginationQueryDTO } from '../../commom/dto/pagination-query.dto';
+import { PaginatedResponse } from '../../commom/interfaces/paginated-response.interface';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private repository: Repository<Product>,
+    private paginationServiece: PaginationService,
   ) {}
 
-  async findAllProducts(filters?: ProductFilterDto): Promise<Product[]> {
+  async findAllProducts(
+    filters?: ProductFilterDto,
+    paginationQuery?: PaginationQueryDTO,
+  ): Promise<PaginatedResponse<Product>> {
     const query = this.repository.createQueryBuilder('product');
 
     if (filters) {
@@ -32,7 +39,7 @@ export class ProductsService {
       }
     }
 
-    return await query.getMany();
+    return await this.paginationServiece.paginate(query, paginationQuery || {});
   }
 
   async createProduct(data: CreateProductDTO): Promise<Product> {

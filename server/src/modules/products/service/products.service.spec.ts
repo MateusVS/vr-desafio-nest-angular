@@ -7,10 +7,16 @@ import { NotFoundException } from '@nestjs/common';
 import { CreateProductDTO } from '../dtos/create-product.dto';
 import { UpdateProductDTO } from '../dtos/update-product.dto';
 import { ProductFilterDto } from '../dtos/products-filter.dto';
+import {
+  Order,
+  PaginationQueryDTO,
+} from '../../commom/dto/pagination-query.dto';
+import { PaginationService } from '../../commom/services/pagination.service';
 
 describe('ProductsService', () => {
   let service: ProductsService;
   let repository: Repository<Product>;
+  let paginationService: PaginationService;
 
   const mockDate = new Date();
   const mockImageString = 'test-image-data';
@@ -28,7 +34,10 @@ describe('ProductsService', () => {
   const mockQueryBuilder = {
     leftJoinAndSelect: jest.fn().mockReturnThis(),
     andWhere: jest.fn().mockReturnThis(),
-    getMany: jest.fn(),
+    orderBy: jest.fn().mockReturnThis(),
+    take: jest.fn().mockReturnThis(),
+    skip: jest.fn().mockReturnThis(),
+    getManyAndCount: jest.fn(),
   };
 
   const mockRepository = {
@@ -40,6 +49,10 @@ describe('ProductsService', () => {
     delete: jest.fn(),
   };
 
+  const mockPaginationService = {
+    paginate: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -48,48 +61,122 @@ describe('ProductsService', () => {
           provide: getRepositoryToken(Product),
           useValue: mockRepository,
         },
+        {
+          provide: PaginationService,
+          useValue: mockPaginationService,
+        },
       ],
     }).compile();
 
     service = module.get<ProductsService>(ProductsService);
     repository = module.get<Repository<Product>>(getRepositoryToken(Product));
+    paginationService = module.get<PaginationService>(PaginationService);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  describe('findAllProducts', () => {
-    it('should apply all filters when provided', async () => {
-      const filters: ProductFilterDto = {
-        id: 1,
-        description: 'Test',
-        cost: 100.0,
-      };
+  it('should apply all filters and use pagination service', async () => {
+    const filters: ProductFilterDto = {
+      id: 1,
+      description: 'Test',
+      cost: 100.0,
+    };
 
-      await service.findAllProducts(filters);
+    const paginationQuery: PaginationQueryDTO = {
+      page: 2,
+      limit: 10,
+      sortBy: 'description',
+      order: Order.DESC,
+    };
 
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        'product.id = :id',
-        { id: filters.id },
-      );
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        'product.description ILIKE :description',
-        {
-          description: `%${filters.description}%`,
-        },
-      );
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        'product.cost = :cost',
-        { cost: filters.cost },
-      );
+    const mockPaginatedResponse = {
+      items: [mockProduct],
+      meta: {
+        totalItems: 1,
+        itemsPerPage: 10,
+        currentPage: 2,
+        totalPages: 1,
+        sortBy: 'description',
+        order: Order.DESC,
+      },
+    };
+
+    mockPaginationService.paginate.mockResolvedValue(mockPaginatedResponse);
+
+    const result = await service.findAllProducts(filters, paginationQuery);
+
+    expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('product.id = :id', {
+      id: filters.id,
     });
+    expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+      'product.description ILIKE :description',
+      {
+        description: `%${filters.description}%`,
+      },
+    );
+    expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+      'product.cost = :cost',
+      { cost: filters.cost },
+    );
 
-    it('should not apply filters when none are provided', async () => {
-      await service.findAllProducts({});
+    expect(mockPaginationService.paginate).toHaveBeenCalledWith(
+      mockQueryBuilder,
+      paginationQuery,
+    );
 
-      expect(mockQueryBuilder.andWhere).not.toHaveBeenCalled();
-    });
+    expect(result).toEqual(mockPaginatedResponse);
+  });
+
+  it('should not apply filters when none are provided but still use pagination', async () => {
+    const paginationQuery: PaginationQueryDTO = {
+      page: 1,
+      limit: 10,
+    };
+
+    const mockPaginatedResponse = {
+      items: [mockProduct],
+      meta: {
+        totalItems: 1,
+        itemsPerPage: 10,
+        currentPage: 1,
+        totalPages: 1,
+      },
+    };
+
+    mockPaginationService.paginate.mockResolvedValue(mockPaginatedResponse);
+
+    const result = await service.findAllProducts({}, paginationQuery);
+
+    expect(mockQueryBuilder.andWhere).not.toHaveBeenCalled();
+    expect(mockPaginationService.paginate).toHaveBeenCalledWith(
+      mockQueryBuilder,
+      paginationQuery,
+    );
+    expect(result).toEqual(mockPaginatedResponse);
+  });
+
+  it('should use default pagination when no pagination query is provided', async () => {
+    const mockPaginatedResponse = {
+      items: [mockProduct],
+      meta: {
+        totalItems: 1,
+        itemsPerPage: 10,
+        currentPage: 1,
+        totalPages: 1,
+      },
+    };
+
+    mockPaginationService.paginate.mockResolvedValue(mockPaginatedResponse);
+
+    const result = await service.findAllProducts({});
+
+    expect(mockPaginationService.paginate).toHaveBeenCalledWith(
+      mockQueryBuilder,
+      {},
+    );
+    expect(result).toEqual(mockPaginatedResponse);
   });
 
   describe('createProduct', () => {

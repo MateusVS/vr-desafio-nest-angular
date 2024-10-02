@@ -14,6 +14,8 @@ import { Product } from '../entity/product.entity';
 import { CreateProductDTO } from '../dtos/create-product.dto';
 import { UpdateProductDTO } from '../dtos/update-product.dto';
 import { ProductFilterDto } from '../dtos/products-filter.dto';
+import { PaginationQueryDTO } from '../../commom/dto/pagination-query.dto';
+import { PaginatedResponse } from '../../commom/interfaces/paginated-response.interface';
 
 @Controller('products')
 export class ProductsController {
@@ -21,8 +23,11 @@ export class ProductsController {
 
   @Get()
   @HttpCode(200)
-  async findAll(@Query() filters: ProductFilterDto): Promise<Product[]> {
-    return await this.productsService.findAllProducts(filters);
+  async findAll(
+    @Query() filters: ProductFilterDto,
+    @Query() paginationQuery: PaginationQueryDTO,
+  ): Promise<PaginatedResponse<Product>> {
+    return await this.productsService.findAllProducts(filters, paginationQuery);
   }
 
   @Post()
