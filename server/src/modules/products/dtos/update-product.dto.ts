@@ -1,7 +1,8 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateProductDTO {
   @IsString()
+  @IsNotEmpty()
   @IsOptional()
   description?: string;
 
@@ -10,6 +11,7 @@ export class UpdateProductDTO {
   cost?: number;
 
   @IsString()
+  @IsNotEmpty()
   @IsOptional()
   image?: string;
 }
