@@ -16,7 +16,6 @@ describe('ProductsController', () => {
   let controller: ProductsController;
   let service: ProductsService;
 
-  const mockDate = new Date();
   const mockImageString = 'test-image-data';
   const mockImageBuffer = Buffer.from(mockImageString);
 
@@ -25,8 +24,8 @@ describe('ProductsController', () => {
     description: 'Test Product',
     cost: 100.0,
     image: mockImageBuffer,
-    createdAt: mockDate,
-    updatedAt: mockDate,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
   const mockPaginatedResponse: PaginatedResponse<Product> = {
