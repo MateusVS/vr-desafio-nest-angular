@@ -4,26 +4,15 @@ import { StoresService } from '../services/stores.service';
 import { CreateStoreDTO } from '../dtos/create-store.dto';
 import { UpdateStoreDTO } from '../dtos/update-store.dto';
 import { PaginationQueryDTO } from '../../commom/dto/pagination-query.dto';
+import {
+  mockStore,
+  mockStoresService,
+} from '../../../../test/utils/store-test.utils';
 
 describe('StoresController', () => {
   let controller: StoresController;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let service: StoresService;
-
-  const mockStore = {
-    id: 1,
-    description: 'Test Store',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  const mockStoresService = {
-    findAllStores: jest.fn(),
-    createStore: jest.fn(),
-    findStoreById: jest.fn(),
-    updateStore: jest.fn(),
-    deleteStore: jest.fn(),
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

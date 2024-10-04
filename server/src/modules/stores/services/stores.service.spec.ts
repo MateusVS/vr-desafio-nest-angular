@@ -5,37 +5,17 @@ import { StoresService } from './stores.service';
 import { Store } from '../entity/store.entity';
 import { PaginationService } from '../../commom/services/pagination.service';
 import { NotFoundException } from '@nestjs/common';
+import {
+  mockStore,
+  mockStoreRepository,
+  mockPaginationService,
+  mockQueryBuilder,
+} from '../../../../test/utils/store-test.utils';
 
 describe('StoresService', () => {
   let service: StoresService;
   let repository: Repository<Store>;
   let paginationService: PaginationService;
-
-  const mockStore = {
-    id: 1,
-    description: 'Test Store',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  const mockQueryBuilder = {
-    andWhere: jest.fn().mockReturnThis(),
-    getMany: jest.fn(),
-    getManyAndCount: jest.fn(),
-  };
-
-  const mockRepository = {
-    createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
-    findOne: jest.fn(),
-    save: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    create: jest.fn(),
-  };
-
-  const mockPaginationService = {
-    paginate: jest.fn(),
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -43,7 +23,7 @@ describe('StoresService', () => {
         StoresService,
         {
           provide: getRepositoryToken(Store),
-          useValue: mockRepository,
+          useValue: mockStoreRepository,
         },
         {
           provide: PaginationService,
@@ -110,7 +90,7 @@ describe('StoresService', () => {
   describe('createStore', () => {
     it('should create a new store', async () => {
       const createStoreDto = { description: 'New Test Store' };
-      mockRepository.save.mockResolvedValue(mockStore);
+      mockStoreRepository.save.mockResolvedValue(mockStore);
 
       const result = await service.createStore(createStoreDto);
 
@@ -121,7 +101,7 @@ describe('StoresService', () => {
 
   describe('findStoreById', () => {
     it('should return a store if found', async () => {
-      mockRepository.findOne.mockResolvedValue(mockStore);
+      mockStoreRepository.findOne.mockResolvedValue(mockStore);
 
       const result = await service.findStoreById(1);
 
@@ -132,7 +112,7 @@ describe('StoresService', () => {
     });
 
     it('should throw NotFoundException if store not found', async () => {
-      mockRepository.findOne.mockResolvedValue(null);
+      mockStoreRepository.findOne.mockResolvedValue(null);
 
       await expect(service.findStoreById(999)).rejects.toThrow(
         NotFoundException,
@@ -143,8 +123,8 @@ describe('StoresService', () => {
   describe('updateStore', () => {
     it('should update a store', async () => {
       const updateStoreDto = { description: 'Updated Test Store' };
-      mockRepository.findOne.mockResolvedValue(mockStore);
-      mockRepository.create.mockReturnValue({
+      mockStoreRepository.findOne.mockResolvedValue(mockStore);
+      mockStoreRepository.create.mockReturnValue({
         ...mockStore,
         ...updateStoreDto,
       });
@@ -156,7 +136,7 @@ describe('StoresService', () => {
     });
 
     it('should throw NotFoundException if store to update not found', async () => {
-      mockRepository.findOne.mockResolvedValue(null);
+      mockStoreRepository.findOne.mockResolvedValue(null);
 
       await expect(
         service.updateStore(999, { description: 'Test' }),
@@ -166,7 +146,7 @@ describe('StoresService', () => {
 
   describe('deleteStore', () => {
     it('should delete a store', async () => {
-      mockRepository.findOne.mockResolvedValue(mockStore);
+      mockStoreRepository.findOne.mockResolvedValue(mockStore);
 
       await service.deleteStore(1);
 
@@ -174,7 +154,7 @@ describe('StoresService', () => {
     });
 
     it('should throw NotFoundException if store to delete not found', async () => {
-      mockRepository.findOne.mockResolvedValue(null);
+      mockStoreRepository.findOne.mockResolvedValue(null);
 
       await expect(service.deleteStore(999)).rejects.toThrow(NotFoundException);
     });

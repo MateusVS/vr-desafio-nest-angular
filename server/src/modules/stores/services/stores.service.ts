@@ -41,7 +41,7 @@ export class StoresService {
     });
 
     if (!store) {
-      throw new NotFoundException('Store not found');
+      throw new NotFoundException('Loja não encontrada');
     }
 
     return store;

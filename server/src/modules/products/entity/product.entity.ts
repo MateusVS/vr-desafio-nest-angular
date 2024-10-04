@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { ProductStore } from './product-store.entity';
 
 @Entity('products')
 export class Product {
@@ -19,6 +21,11 @@ export class Product {
 
   @Column({ type: 'bytea', nullable: true })
   image: Buffer;
+
+  @OneToMany(() => ProductStore, (productStore) => productStore.product, {
+    cascade: true,
+  })
+  productStores: ProductStore[];
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
