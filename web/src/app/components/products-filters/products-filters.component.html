@@ -1,0 +1,21 @@
+<form [formGroup]="filterForm" class="filters-container">
+  <mat-form-field>
+    <mat-label>Código</mat-label>
+    <input matInput formControlName="id">
+  </mat-form-field>
+
+  <mat-form-field class="description-field">
+    <mat-label>Descrição</mat-label>
+    <input matInput formControlName="description">
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Custo</mat-label>
+    <input matInput formControlName="cost" type="number">
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Preço de Venda</mat-label>
+    <input matInput formControlName="salePrice" type="number">
+  </mat-form-field>
+</form>

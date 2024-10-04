@@ -1,0 +1,17 @@
+.toolbar {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .add-button {
+    position: absolute;
+    left: 5px;
+  }
+
+  .toolbar-text {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
