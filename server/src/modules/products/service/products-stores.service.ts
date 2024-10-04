@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -25,22 +26,31 @@ export class ProductsStoresServices {
   async createProductsStores(
     data: CreateProductsStoresDTO,
   ): Promise<ProductStore> {
-    const { productId, salePrice, storeId } = data;
+    try {
+      const { productId, salePrice, storeId } = data;
 
-    await this.findExistingPrice(productId, storeId);
+      await this.findExistingPrice(productId, storeId);
 
-    await Promise.all([
-      this.checkIfProductExists(productId),
-      this.checkIfProductExists(storeId),
-    ]);
+      await Promise.all([
+        this.checkIfProductExists(productId),
+        this.checkIfStoreExists(storeId),
+      ]);
 
-    const productStore = this.repository.create({
-      salePrice,
-      product: { id: productId },
-      store: { id: storeId },
-    });
+      const productStore = this.repository.create({
+        salePrice,
+        product: { id: productId },
+        store: { id: storeId },
+      });
 
-    return await this.repository.save(productStore);
+      return await this.repository.save(productStore);
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException(
+          'Um ou mais campos obrigatórios não foram preenchidos corretamente.',
+        );
+      }
+      throw error;
+    }
   }
 
   async findByProductId(productId: number): Promise<ProductStore[]> {
@@ -54,25 +64,40 @@ export class ProductsStoresServices {
     id: number,
     data: UpdateProductsStoresDTO,
   ): Promise<ProductStore> {
-    const { storeId } = data;
-    const productsStores = await this.findProductStoreById(id);
+    try {
+      const { storeId } = data;
+      const productsStores = await this.findProductStoreById(id);
 
-    if (!productsStores) {
-      throw new NotFoundException('ProductStore not found');
+      if (!productsStores) {
+        throw new NotFoundException(
+          'O vínculo entre o produto e essa loja não existe',
+        );
+      }
+
+      if (storeId) {
+        await this.findExistingPrice(productsStores.product.id, storeId);
+      }
+
+      await this.repository.update(id, data);
+
+      return this.repository.create({ ...productsStores, ...data });
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException(
+          'Um ou mais campos obrigatórios não foram preenchidos corretamente.',
+        );
+      }
+      throw error;
     }
-
-    await this.findExistingPrice(productsStores.product.id, storeId);
-
-    await this.repository.update(id, data);
-
-    return this.repository.create({ ...productsStores, ...data });
   }
 
   async removeProductStore(id: number): Promise<void> {
     const result = await this.findProductStoreById(id);
 
     if (!result) {
-      throw new NotFoundException('ProductStore not found');
+      throw new NotFoundException(
+        'O vínculo entre o produto e essa loja não existe',
+      );
     }
 
     await this.repository.delete(id);
@@ -98,7 +123,7 @@ export class ProductsStoresServices {
 
     if (existingPrice) {
       throw new ConflictException(
-        'It is not allowed to have more than one selling price for the same store',
+        'Não é permitido mais que um preço de venda para a mesma loja.',
       );
     }
   }
@@ -109,7 +134,7 @@ export class ProductsStoresServices {
     });
 
     if (!product) {
-      throw new NotFoundException('Product not found.');
+      throw new NotFoundException('Produto não encontrado.');
     }
   }
 
@@ -119,7 +144,7 @@ export class ProductsStoresServices {
     });
 
     if (!store) {
-      throw new NotFoundException('Store not found.');
+      throw new NotFoundException('Loja não encontrada.');
     }
   }
 }

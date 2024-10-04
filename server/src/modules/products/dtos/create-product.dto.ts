@@ -11,7 +11,7 @@ import { Type } from 'class-transformer';
 
 export class CreateProductDTO {
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'A descrição do produto é obrigatória.' })
   description: string;
 
   @IsNumber()
@@ -25,6 +25,8 @@ export class CreateProductDTO {
 
   @ValidateNested({ each: true })
   @Type(() => CreateProductsStoresDTO)
-  @ArrayMinSize(1)
-  stores: CreateProductsStoresDTO[];
+  @ArrayMinSize(1, {
+    message: 'É necessário fornecer pelo menos um registro em productsStores.',
+  })
+  productsStores: CreateProductsStoresDTO[];
 }

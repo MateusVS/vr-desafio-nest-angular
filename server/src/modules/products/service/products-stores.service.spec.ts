@@ -8,30 +8,16 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { CreateProductsStoresDTO } from '../dtos/create-products-stores.dto';
 import { UpdateProductsStoresDTO } from '../dtos/update-products-stores.dto';
+import {
+  mockProduct,
+  mockStore,
+} from '../../../../test/utils/product-test.utils';
 
 describe('ProductsServices', () => {
   let service: ProductsStoresServices;
   let productStoreRepository: Repository<ProductStore>;
   let productRepository: Repository<Product>;
   let storeRepository: Repository<Store>;
-
-  const mockProduct: Product = {
-    id: 1,
-    description: 'Test Product',
-    cost: 8.99,
-    image: Buffer.from('test image'),
-    productStores: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  const mockStore: Store = {
-    id: 1,
-    description: 'Test Store',
-    productStores: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
