@@ -18,6 +18,8 @@ services:
       - .env
     depends_on:
       - db
+    command: >
+      sh -c "npm run migration:run"
 
   db:
     image: postgres:17
