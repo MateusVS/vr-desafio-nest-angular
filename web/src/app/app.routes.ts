@@ -1,20 +1,21 @@
 import { Routes } from '@angular/router';
+import {
+  ProductRegistrationComponent,
+} from './pages/product-registration/product-registration.component';
+import { ProductsComponent } from './pages/products/products.component';
 
-export const routes: Routes = [];
-
-
-
-// import { Routes } from '@angular/router';
-
-// export const routes: Routes = [
-//   {
-//     path: 'produtos',
-//     component: ProdutosComponent,
-//     title: 'Consulta de Produto'
-//   },
-//   {
-//     path: 'clientes',
-//     component: ClientesComponent,
-//     title: 'Consulta de Cliente'
-//   }
-// ];
+export const routes: Routes = [
+  {
+    path: 'produto',
+    component: ProductsComponent,
+  },
+  {
+    path: 'produto/cadastro',
+    component: ProductRegistrationComponent,
+  },
+  {
+    path: '',
+    redirectTo: 'produto',
+    pathMatch: 'full',
+  }
+];

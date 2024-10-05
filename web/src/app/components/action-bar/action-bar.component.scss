@@ -1,12 +1,25 @@
+$buttons-background: #6666;
+
 .toolbar {
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
 
-  .add-button {
+  .button {
     position: absolute;
     left: 5px;
+    background-color: $buttons-background;
+  }
+
+  .add-button,
+  .save-button {
+    @extend .button;
+  }
+
+  .delete-button {
+    @extend .button;
+    margin-left: 50px;
   }
 
   .toolbar-text {

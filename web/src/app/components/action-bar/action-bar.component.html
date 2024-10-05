@@ -1,6 +1,17 @@
 <mat-toolbar class="toolbar" color="primary">
-  <button mat-icon-button class="add-button">
-    <mat-icon>add</mat-icon>
-  </button>
+  <ng-container *ngIf="!isProductRegistrationRoute">
+    <button mat-icon-button class="add-button" routerLink="/produto/cadastro">
+      <mat-icon>add</mat-icon>
+    </button>
+  </ng-container>
+
+  <ng-container *ngIf="isProductRegistrationRoute">
+    <button mat-icon-button class="save-button" (click)="salvarProduto()">
+      <mat-icon>save</mat-icon>
+    </button>
+    <button mat-icon-button class="delete-button" (click)="excluirProduto()">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </ng-container>
   <span class="toolbar-text">{{ pageTitle }}</span>
 </mat-toolbar>

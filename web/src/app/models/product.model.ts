@@ -19,5 +19,3 @@ export class Product {
     this.productsStores = productsStores;
   }
 }
-
-
