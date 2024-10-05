@@ -2,13 +2,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  padding: 16px;
+  margin-top: 30px;
+  margin-bottom: 20px;
 }
 
-// mat-form-field {
-//   flex: 1 1 200px;
-// }
-
-// .description-field {
-//   flex: 2 1 400px;
-// }
+.description-field {
+  width: 600px;
+}
