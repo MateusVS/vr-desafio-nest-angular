@@ -6,6 +6,7 @@ import { ProductsService } from './service/products.service';
 import { CommonModule } from '../commom/commom.module';
 import { ProductStore } from './entity/product-store.entity';
 import { Store } from '../stores/entity/store.entity';
+import { ProductsStoresServices } from './service/products-stores.service';
 
 @Module({
   imports: [
@@ -13,6 +14,6 @@ import { Store } from '../stores/entity/store.entity';
     TypeOrmModule.forFeature([Product, ProductStore, Store]),
   ],
   controllers: [ProductsController],
-  providers: [ProductsService],
+  providers: [ProductsService, ProductsStoresServices],
 })
 export class ProductsModule {}

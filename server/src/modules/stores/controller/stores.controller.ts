@@ -23,7 +23,7 @@ export class StoresController {
   @Get()
   @HttpCode(200)
   async findAll(
-    @Query() filter: string,
+    @Query('filter') filter: string,
     @Query() paginationQuery: PaginationQueryDTO,
   ): Promise<PaginatedResponse<Store>> {
     return await this.storesService.findAllStores(filter, paginationQuery);

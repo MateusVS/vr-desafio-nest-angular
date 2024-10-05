@@ -22,10 +22,16 @@ export class StoresService {
   ): Promise<PaginatedResponse<Store>> {
     const query = this.repository.createQueryBuilder('store');
 
-    if (filter) {
-      query.andWhere('store.id = :filter OR store.description ILIKE :filter', {
-        filter: `${filter}`,
-      });
+    if (typeof filter === 'string' && filter.trim() !== '') {
+      const isNumeric = !isNaN(Number(filter));
+
+      if (isNumeric) {
+        query.where('store.id = :id', { id: parseInt(filter) });
+      } else {
+        query.where('store.description ILIKE :description', {
+          description: `%${filter}%`,
+        });
+      }
     }
 
     return await this.paginationServiece.paginate(query, paginationQuery || {});
