@@ -1,1 +1,13 @@
-<products-stores-table></products-stores-table>
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="product-page-container">
+    <div class="left-section">
+      <products-inputs [formGroup]="form"></products-inputs>
+      <products-stores-table (productStoresChange)="onProductStoresChange($event)">
+      </products-stores-table>
+    </div>
+
+    <div class="image-section">
+      <image-upload (imageChange)="onImageChange($event)"></image-upload>
+    </div>
+  </div>
+</form>

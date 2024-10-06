@@ -1,0 +1,17 @@
+<div class="image-upload">
+  <label for="file-input">
+    <div class="image-preview" *ngIf="imageUrl; else placeholder">
+      <img [src]="imageUrl" alt="Image Preview" />
+    </div>
+    <ng-template #placeholder>
+      <div class="placeholder">Clique para adicionar uma imagem</div>
+    </ng-template>
+  </label>
+  <input
+    id="file-input"
+    type="file"
+    accept="image/*"
+    (change)="onFileChange($event)"
+    style="display: none;"
+  />
+</div>

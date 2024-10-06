@@ -57,15 +57,15 @@ describe('StoresService', () => {
 
       expect(result).toEqual(expectedResult);
       expect(repository.createQueryBuilder).toHaveBeenCalledWith('store');
-      expect(mockQueryBuilder.andWhere).not.toHaveBeenCalled();
+      expect(mockQueryBuilder.where).not.toHaveBeenCalled();
       expect(paginationService.paginate).toHaveBeenCalledWith(
         mockQueryBuilder,
         paginationQuery,
       );
     });
 
-    it('should return filtered paginated stores', async () => {
-      const filter = 'test';
+    it('should return filtered paginated stores with numeric filter', async () => {
+      const numericFilter = '1';
       const paginationQuery = { page: 1, limit: 10 };
       const expectedResult = {
         items: [mockStore],
@@ -76,13 +76,32 @@ describe('StoresService', () => {
 
       mockPaginationService.paginate.mockResolvedValue(expectedResult);
 
-      const result = await service.findAllStores(filter, paginationQuery);
+      const result = await service.findAllStores(numericFilter, paginationQuery);
 
       expect(result).toEqual(expectedResult);
       expect(repository.createQueryBuilder).toHaveBeenCalledWith('store');
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        'store.id = :filter OR store.description ILIKE :filter',
-        { filter: 'test' },
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('store.id = :id', { id: 1 });
+    });
+
+    it('should return filtered paginated stores with text filter', async () => {
+      const textFilter = 'test';
+      const paginationQuery = { page: 1, limit: 10 };
+      const expectedResult = {
+        items: [mockStore],
+        total: 1,
+        page: 1,
+        limit: 10,
+      };
+
+      mockPaginationService.paginate.mockResolvedValue(expectedResult);
+
+      const result = await service.findAllStores(textFilter, paginationQuery);
+
+      expect(result).toEqual(expectedResult);
+      expect(repository.createQueryBuilder).toHaveBeenCalledWith('store');
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'store.description ILIKE :description',
+        { description: '%test%' },
       );
     });
   });
@@ -115,7 +134,7 @@ describe('StoresService', () => {
       mockStoreRepository.findOne.mockResolvedValue(null);
 
       await expect(service.findStoreById(999)).rejects.toThrow(
-        NotFoundException,
+        'Loja não encontrada',
       );
     });
   });
@@ -140,7 +159,7 @@ describe('StoresService', () => {
 
       await expect(
         service.updateStore(999, { description: 'Test' }),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow('Loja não encontrada');
     });
   });
 
@@ -156,7 +175,7 @@ describe('StoresService', () => {
     it('should throw NotFoundException if store to delete not found', async () => {
       mockStoreRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.deleteStore(999)).rejects.toThrow(NotFoundException);
+      await expect(service.deleteStore(999)).rejects.toThrow('Loja não encontrada');
     });
   });
 });

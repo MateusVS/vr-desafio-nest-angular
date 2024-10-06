@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>
+  <mat-dialog-actions class="centered-content">
+    <button mat-icon-button color="primary" (click)="save()" [disabled]="!form.valid">
+      <mat-icon>save</mat-icon>
+    </button>
+    <span>Alteração/Inclusão de Preço</span>
+    <button mat-icon-button class="delete-button" color="warn" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-dialog-actions>
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <mat-form-field appearance="fill">
+      <mat-label>Loja</mat-label>
+      <mat-select formControlName="storeId" required>
+        <mat-option *ngFor="let store of stores" [value]="store.id">
+          {{store.description}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Preço de Venda (R$)</mat-label>
+      <input matInput type="number" formControlName="salePrice" required>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>

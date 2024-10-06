@@ -1,0 +1,16 @@
+<div class="inputs-container" [formGroup]="formGroup">
+  <mat-form-field>
+    <mat-label>Código *</mat-label>
+    <input matInput formControlName="id" readonly>
+  </mat-form-field>
+
+  <mat-form-field class="description-field">
+    <mat-label>Descrição</mat-label>
+    <input matInput formControlName="description" required>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Custo</mat-label>
+    <input matInput formControlName="cost" type="number">
+  </mat-form-field>
+</div>

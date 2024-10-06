@@ -8,6 +8,7 @@ export const mockStore = {
 };
 
 export const mockQueryBuilder = {
+  where: jest.fn().mockReturnThis(),
   andWhere: jest.fn().mockReturnThis(),
   getMany: jest.fn(),
   getManyAndCount: jest.fn(),

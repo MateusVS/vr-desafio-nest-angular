@@ -1,15 +1,18 @@
 export class ProductStore {
-  id: number;
-  name: string;
-  sale_price: number;
+  id?: number;
+  storeDescription: string;
+  storeId: number;
+  salePrice: number;
 
   constructor({
     id,
-    name,
-    sale_price,
+    storeDescription,
+    storeId,
+    salePrice,
   }: ProductStore) {
     this.id = id;
-    this.name = name;
-    this.sale_price = sale_price;
+    this.storeDescription = storeDescription;
+    this.storeId = storeId;
+    this.salePrice = salePrice;
   }
 }

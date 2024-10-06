@@ -10,6 +10,6 @@ import { ActionBarComponent } from './components/action-bar/action-bar.component
     ActionBarComponent,
   ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {}

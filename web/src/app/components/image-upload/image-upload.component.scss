@@ -1,0 +1,38 @@
+$image-border-color: #ccc;
+$image-placeholder-color: #aaa;
+$image-size: 150px;
+
+.image-upload {
+  position: relative;
+  width: $image-size;
+  height: $image-size;
+  border: 2px dashed $image-border-color;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  margin-top: 30px;
+
+  .image-preview {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: $image-placeholder-color;
+  }
+}

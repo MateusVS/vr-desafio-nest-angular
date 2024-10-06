@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -7,6 +7,7 @@ import { Title } from '@angular/platform-browser';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { ProductService } from '../../services/products.service';
 
 @Component({
   selector: 'action-bar',
@@ -22,6 +23,8 @@ import { filter } from 'rxjs/operators';
   styleUrl: './action-bar.component.scss'
 })
 export class ActionBarComponent implements OnInit, OnDestroy {
+  @Output() saveProduct = new EventEmitter<void>();
+
   pageTitle: string = '';
   isProductRegistrationRoute: boolean = false;
   private titleSubscription: Subscription | undefined;
@@ -29,6 +32,7 @@ export class ActionBarComponent implements OnInit, OnDestroy {
   constructor(
     private titleService: Title,
     private router: Router,
+    private productService: ProductService,
   ) {}
 
   ngOnInit() {
@@ -51,13 +55,11 @@ export class ActionBarComponent implements OnInit, OnDestroy {
     this.isProductRegistrationRoute = this.router.url.includes('/produto/cadastro');
   }
 
-  salvarProduto() {
-    // Implementar lógica de salvamento
-    console.log('Salvando produto...');
+  save() {
+    this.productService.triggerSubmit();
   }
 
   excluirProduto() {
-    // Implementar lógica de exclusão
     console.log('Excluindo produto...');
   }
 }
