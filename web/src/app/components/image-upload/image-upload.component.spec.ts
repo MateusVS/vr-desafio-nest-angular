@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ImageUploadComponent } from './image-upload.component';
-import { By } from '@angular/platform-browser';
 
 describe('ImageUploadComponent', () => {
   let component: ImageUploadComponent;

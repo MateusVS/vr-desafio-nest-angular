@@ -28,5 +28,5 @@ export class CreateProductDTO {
   @ArrayMinSize(1, {
     message: 'É necessário fornecer pelo menos um registro em productsStores.',
   })
-  productsStores: CreateProductsStoresDTO[];
+  productStores: CreateProductsStoresDTO[];
 }

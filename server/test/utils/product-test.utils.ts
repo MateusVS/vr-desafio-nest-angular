@@ -70,7 +70,7 @@ export const createMockCreateProductDTO = (
   description: 'Test Product',
   cost: 100.0,
   image: mockImageString,
-  productsStores: [
+  productStores: [
     {
       storeId: 1,
       salePrice: 150.0,

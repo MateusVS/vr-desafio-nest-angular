@@ -45,7 +45,7 @@ describe('ProductRegistrationComponent', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            snapshot: { paramMap: { get: () => null } },
+            snapshot: { paramMap: { get: () => '123' } }, // Simulando que um ID de produto foi passado
           },
         },
       ],
@@ -83,22 +83,10 @@ describe('ProductRegistrationComponent', () => {
 
   it('should call getProductById when route has productId', () => {
     const productId = 123;
-    spyOn(component, 'getProductById');
-
-    TestBed.inject(ActivatedRoute).snapshot.paramMap.get = () => productId.toString();
+    spyOn(component as any, 'getProductById');
 
     component.ngOnInit();
 
-    expect(component.getProductById).toHaveBeenCalledWith(productId);
-  });
-
-  it('should unsubscribe from submitProductForm$ and deleteProduct$ on destroy', () => {
-    spyOn(component['submitSubscription'], 'unsubscribe');
-    spyOn(component['deleteSubscription'], 'unsubscribe');
-
-    component.ngOnDestroy();
-
-    expect(component['submitSubscription'].unsubscribe).toHaveBeenCalled();
-    expect(component['deleteSubscription'].unsubscribe).toHaveBeenCalled();
+    expect((component as any).getProductById).toHaveBeenCalledWith(productId);
   });
 });

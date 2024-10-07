@@ -6,8 +6,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
 import { of, throwError } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatSort, Sort } from '@angular/material/sort';
 import { Product } from '../../models/product.model';
 import { ApiResponse } from '../../interfaces/api-response.interface';
 
@@ -17,6 +17,9 @@ describe('ProductsTableComponent', () => {
   let apiServiceSpy: jasmine.SpyObj<ApiService>;
   let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
   let dialogSpy: jasmine.SpyObj<MatDialog>;
+
+  const product = { id: 1, description: 'Product 1' };
+  const dialogRefMock = jasmine.createSpyObj('MatDialogRef', ['afterClosed']);
 
   beforeEach(async () => {
     apiServiceSpy = jasmine.createSpyObj('ApiService', ['getProducts', 'deleteProduct']);
@@ -46,7 +49,12 @@ describe('ProductsTableComponent', () => {
   it('should load products on init', () => {
     const mockResponse: ApiResponse<Product> = {
       items: [{ id: 1, description: 'Product 1', cost: 10 }],
-      meta: { totalItems: 1 }
+      meta: {
+        totalItems: 1,
+        itemsPerPage: 0,
+        currentPage: 0,
+        totalPages: 0
+      }
     };
     apiServiceSpy.getProducts.and.returnValue(of(mockResponse));
 
@@ -97,22 +105,20 @@ describe('ProductsTableComponent', () => {
     component.currentFilters = {};
     component.currentPage = 1;
 
+    spyOn(component, 'loadProducts');
+
     component.onFiltersChanged(filters);
 
     expect(component.currentFilters).toEqual(filters);
     expect(component.currentPage).toBe(0);
-    expect(snackBarSpy.open).toHaveBeenCalled();
+    expect(component.loadProducts).toHaveBeenCalled();
+  });
 
   it('should open delete confirmation modal', () => {
-    const product = { id: 1, description: 'Product 1' };
-    const dialogRefMock = {
-      afterClosed: () => ({
-        subscribe: (callback: (result: boolean) => void) => callback(true)
-      })
-    };
+    dialogRefMock.afterClosed.and.returnValue(of(true));
 
     dialogSpy.open.and.returnValue(dialogRefMock);
-    apiServiceSpy.deleteProduct.and.returnValue(of(null));
+    apiServiceSpy.deleteProduct.and.returnValue(of(undefined));
 
     component.openDeleteConfirmationModal(product);
 
@@ -124,13 +130,6 @@ describe('ProductsTableComponent', () => {
   });
 
   it('should handle error while deleting product', () => {
-    const product = { id: 1, description: 'Product 1' };
-    const dialogRefMock = {
-      afterClosed: () => ({
-        subscribe: (callback: (result: boolean) => void) => callback(true)
-      })
-    };
-
     dialogSpy.open.and.returnValue(dialogRefMock);
     const errorMessage = 'Error deleting product';
     apiServiceSpy.deleteProduct.and.returnValue(throwError(() => new Error(errorMessage)));

@@ -59,9 +59,9 @@ export class ProductsService {
   }
 
   async createProduct(data: CreateProductDTO): Promise<Product> {
-    const { description, cost, image, productsStores } = data;
+    const { description, cost, image, productStores } = data;
 
-    if (!productsStores || productsStores.length === 0) {
+    if (!productStores || productStores.length === 0) {
       throw new BadRequestException(
         'Pelo menos um preço de loja deve ser fornecido para o produto.',
       );
@@ -76,7 +76,7 @@ export class ProductsService {
     const savedProduct = await this.repository.save(product);
 
     await Promise.all(
-      productsStores.map(({ storeId, salePrice }) =>
+      productStores.map(({ storeId, salePrice }) =>
         this.productsStoresService.createProductsStores({
           productId: savedProduct.id,
           storeId,

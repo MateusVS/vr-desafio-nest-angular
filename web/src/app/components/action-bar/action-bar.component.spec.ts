@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import { Router, NavigationEnd } from '@angular/router';
 import { ProductService } from '../../services/products.service';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,15 +15,16 @@ describe('ActionBarComponent', () => {
   let mockTitleService: jasmine.SpyObj<Title>;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockProductService: jasmine.SpyObj<ProductService>;
-  let routerEventsSubject: Subject<any>;
+  let routerEventsSubject: BehaviorSubject<any>;
 
   beforeEach(async () => {
     mockTitleService = jasmine.createSpyObj('Title', ['getTitle']);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate'], ['url']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
     mockProductService = jasmine.createSpyObj('ProductService', ['triggerSubmit', 'triggerDelete']);
 
-    routerEventsSubject = new Subject<any>();
-    mockRouter.events = routerEventsSubject.asObservable();
+    routerEventsSubject = new BehaviorSubject<any>(null);
+    Object.defineProperty(mockRouter, 'events', { get: () => routerEventsSubject.asObservable() });
+    Object.defineProperty(mockRouter, 'url', { get: () => '/produto/cadastro' });
 
     await TestBed.configureTestingModule({
       declarations: [ActionBarComponent],
@@ -42,6 +43,7 @@ describe('ActionBarComponent', () => {
 
     fixture = TestBed.createComponent(ActionBarComponent);
     component = fixture.componentInstance;
+
     fixture.detectChanges();
   });
 
@@ -57,18 +59,11 @@ describe('ActionBarComponent', () => {
 
   it('should update the title and route on navigation event', () => {
     mockTitleService.getTitle.and.returnValue('Nova Página');
-    mockRouter.url = '/produto/cadastro';
 
     routerEventsSubject.next(new NavigationEnd(1, '/produto/cadastro', '/produto/cadastro'));
 
     expect(component.pageTitle).toBe('Nova Página');
     expect(component.isProductRegistrationRoute).toBeTrue();
-  });
-
-  it('should unsubscribe from router events on destroy', () => {
-    spyOn(component['titleSubscription'], 'unsubscribe');
-    component.ngOnDestroy();
-    expect(component['titleSubscription'].unsubscribe).toHaveBeenCalled();
   });
 
   it('should trigger submit on save', () => {

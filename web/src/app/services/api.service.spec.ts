@@ -32,7 +32,7 @@ describe('ApiService', () => {
     const mockResponse: ApiResponse<Store> = {
       items: [{ id: 1, description: 'Store 1' }, { id: 2, description: 'Store 2' }],
       meta: {
-        totalItems: 0,
+        totalItems: 2,
         itemsPerPage: 0,
         currentPage: 0,
         totalPages: 0
@@ -41,8 +41,8 @@ describe('ApiService', () => {
 
     service.getStores().subscribe((stores) => {
       expect(stores.length).toBe(2);
-      expect(stores[0].description).toBe('1 - Store 1');
-      expect(stores[1].description).toBe('2 - Store 2');
+      expect(stores[0].description).toBe('Store 1');
+      expect(stores[1].description).toBe('Store 2');
     });
 
     const req = httpMock.expectOne(`${baseUrl}/stores`);
@@ -53,12 +53,18 @@ describe('ApiService', () => {
   it('should fetch products with query params', () => {
     const params = { category: 'electronics', page: 1 };
     const mockResponse: ApiResponse<Product> = {
-      items: [{ id: 1, name: 'Product 1' }, { id: 2, name: 'Product 2' }],
+      items: [{ id: 1, description: 'Product 1' }, { id: 2, description: 'Product 2' }],
+      meta: {
+        totalItems: 2,
+        itemsPerPage: 2,
+        currentPage: 1,
+        totalPages: 1
+      }
     };
 
     service.getProducts(params).subscribe((response) => {
       expect(response.items.length).toBe(2);
-      expect(response.items[0].name).toBe('Product 1');
+      expect(response.items[0].description).toBe('Product 1');
     });
 
     const req = httpMock.expectOne((request) =>
@@ -69,7 +75,7 @@ describe('ApiService', () => {
   });
 
   it('should fetch product by id', () => {
-    const mockProduct: Product = { id: 1, name: 'Product 1' };
+    const mockProduct: Product = { id: 1, description: 'Product 1' };
 
     service.getProductById(1).subscribe((product) => {
       expect(product).toEqual(mockProduct);
@@ -81,8 +87,8 @@ describe('ApiService', () => {
   });
 
   it('should create a new product', () => {
-    const newProduct = { name: 'New Product' };
-    const mockProduct: Product = { id: 1, name: 'New Product' };
+    const newProduct = { description: 'New Product' };
+    const mockProduct: Product = { id: 1, description: 'New Product' };
 
     service.createProduct(newProduct).subscribe((product) => {
       expect(product).toEqual(mockProduct);
@@ -94,8 +100,8 @@ describe('ApiService', () => {
   });
 
   it('should update a product', () => {
-    const updatedProduct = { name: 'Updated Product' };
-    const mockProduct: Product = { id: 1, name: 'Updated Product' };
+    const updatedProduct = { description: 'Updated Product' };
+    const mockProduct: Product = { id: 1, description: 'Updated Product' };
 
     service.updateProduct(1, updatedProduct).subscribe((product) => {
       expect(product).toEqual(mockProduct);

@@ -158,27 +158,27 @@ export class ProductRegistrationComponent implements OnInit, OnDestroy {
             this.snackBar.open('Erro ao criar produto: ' + error.message, 'Fechar', {
               duration: 5000
             });
+            return;
+          }
+        );
+      } else {
+        this.apiService.updateProduct(formData.id, productData).subscribe(
+          response => {
+            this.snackBar.open('Produto atualizado com sucesso!', 'Fechar', {
+              duration: 3000
+            });
+
+            setTimeout(() => {
+              this.router.navigate(['/produto']);
+            }, 1500);
+          },
+          error => {
+            this.snackBar.open('Erro ao atualizar produto: ' + error.message, 'Fechar', {
+              duration: 5000
+            });
           }
         );
       }
-
-      this.apiService.updateProduct(formData.id, productData).subscribe(
-        response => {
-          console.log(productData)
-          this.snackBar.open('Produto atualizado com sucesso!', 'Fechar', {
-            duration: 3000
-          });
-
-          setTimeout(() => {
-            this.router.navigate(['/produto']);
-          }, 1500);
-        },
-        error => {
-          this.snackBar.open('Erro ao atualizado produto: ' + error.message, 'Fechar', {
-            duration: 5000
-          });
-        }
-      );
     } else {
       this.snackBar.open('Por favor, preencha todos os campos obrigatórios', 'Fechar', {
         duration: 3000

@@ -1,9 +1,9 @@
-import { IsNumber, IsNotEmpty, Min } from 'class-validator';
+import { IsNumber, IsNotEmpty, Min, IsOptional } from 'class-validator';
 
 export class CreateProductsStoresDTO {
   @IsNumber()
-  @IsNotEmpty({ message: 'O ID do produto é obrigatório' })
-  productId: number;
+  @IsOptional()
+  productId?: number;
 
   @IsNumber()
   @IsNotEmpty({ message: 'O ID da loja é obrigatório' })

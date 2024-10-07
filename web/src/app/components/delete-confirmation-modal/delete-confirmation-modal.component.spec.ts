@@ -17,7 +17,6 @@ describe('DeleteConfirmationModalComponent', () => {
   };
 
   beforeEach(async () => {
-    // Criação de mock para MatDialogRef
     mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
 
     await TestBed.configureTestingModule({

@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsService } from './products.service';
 import { Repository } from 'typeorm';
 import { Product } from '../entity/product.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { ProductFilterDTO } from '../dtos/products-filter.dto';
 import {
   OrderDirection,
@@ -23,7 +24,7 @@ import {
 describe('ProductsService', () => {
   let service: ProductsService;
   let repository: Repository<Product>;
-  let productsStoresService: ProductsStoresServices;
+  let productStoresService: ProductsStoresServices;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -46,7 +47,7 @@ describe('ProductsService', () => {
 
     service = module.get<ProductsService>(ProductsService);
     repository = module.get<Repository<Product>>(getRepositoryToken(Product));
-    productsStoresService = module.get<ProductsStoresServices>(
+    productStoresService = module.get<ProductsStoresServices>(
       ProductsStoresServices,
     );
   });
@@ -143,8 +144,8 @@ describe('ProductsService', () => {
         mockProductsStoresService.createProductsStores,
       ).toHaveBeenCalledWith({
         productId: mockProduct.id,
-        storeId: createProductDto.productsStores[0].storeId,
-        salePrice: createProductDto.productsStores[0].salePrice,
+        storeId: createProductDto.productStores[0].storeId,
+        salePrice: createProductDto.productStores[0].salePrice,
       });
       expect(result).toEqual(mockProduct);
     });

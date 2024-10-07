@@ -20,7 +20,7 @@ describe('ProductsComponent', () => {
       providers: [
         { provide: Title, useValue: mockTitleService }
       ],
-      schemas: [NO_ERRORS_SCHEMA], // Ignora os detalhes do template e componentes filhos
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProductsComponent);
