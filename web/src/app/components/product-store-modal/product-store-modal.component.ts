@@ -10,7 +10,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { Store } from '../../models/store.model';
 import { ProductStore } from '../../models/product-store.model';
 import { ApiService } from '../../services/api.service';
-import { tap } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({

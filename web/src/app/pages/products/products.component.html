@@ -1,6 +1,6 @@
 <div class="page-container">
   <main>
-    <products-filters></products-filters>
+    <products-filters (filtersChanged)="onFiltersChanged($event)"></products-filters>
     <products-table></products-table>
   </main>
 </div>

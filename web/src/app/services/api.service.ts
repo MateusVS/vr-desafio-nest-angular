@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiResponse } from '../interfaces/api-response.interface';
@@ -25,7 +25,28 @@ export class ApiService {
       );
   }
 
+  getProducts(params: any = {}): Observable<ApiResponse<Product>>  {
+    let httpParams = new HttpParams();
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        httpParams = httpParams.append(key, value.toString());
+      }
+    });
+
+
+    return this.http.get<ApiResponse<Product>>(`${this.baseUrl}/products`, { params: httpParams });
+  }
+
+  getProductById(productId: number): Observable<Product> {
+    return this.http.get<Product>(`${this.baseUrl}/products/${productId}`);
+  }
+
   createProduct(productData: any): Observable<Product> {
     return this.http.post<Product>(`${this.baseUrl}/products`, productData);
+  }
+
+  deleteProduct(productId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/products/${productId}`);
   }
 }

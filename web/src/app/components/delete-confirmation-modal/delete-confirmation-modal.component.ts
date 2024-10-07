@@ -2,7 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, Inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { ProductStore } from '../../models/product-store.model';
+
+interface DialogData {
+  item: any;
+  message: string;
+}
 
 @Component({
   selector: 'delete-confirmation-modal',
@@ -18,7 +22,7 @@ import { ProductStore } from '../../models/product-store.model';
 export class DeleteConfirmationModalComponent {
   constructor(
     public dialogRef: MatDialogRef<DeleteConfirmationModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ProductStore
+    @Inject(MAT_DIALOG_DATA) public data: DialogData
   ) {}
 
   onCancel(): void {

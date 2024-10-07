@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
@@ -24,6 +24,18 @@ import { DeleteConfirmationModalComponent } from '../delete-confirmation-modal/d
 })
 export class ProductsStoresTableComponent {
   @Output() productStoresChange = new EventEmitter<ProductStore[]>();
+  @Input() set initialStores(stores: any[]) {
+    if (stores && stores.length > 0) {
+      const mappedStores = stores.map(store => ({
+        id: store.id,
+        storeId: store.storeId,
+        storeDescription: store.storeDescription,
+        salePrice: store.salePrice
+      }));
+      this.dataSource = mappedStores;
+      this.productStoresChange.emit(this.dataSource);
+    }
+  }
 
   displayedColumns: string[] = ['add', 'store_name', 'sale_price', 'actions'];
   dataSource: ProductStore[] = [];
@@ -63,7 +75,10 @@ export class ProductsStoresTableComponent {
   openDeleteConfirmationModal(productStore: ProductStore): void {
     const dialogRef = this.dialog.open(DeleteConfirmationModalComponent, {
       width: '400px',
-      data: new ProductStore({...productStore})
+      data:  {
+        item: productStore,
+        message: `Tem certeza que deseja excluir a loja "${productStore.storeDescription}" deste produto?`
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {

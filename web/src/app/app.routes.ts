@@ -14,6 +14,10 @@ export const routes: Routes = [
     component: ProductRegistrationComponent,
   },
   {
+    path: 'produto/cadastro/:id',
+    component: ProductRegistrationComponent
+  },
+  {
     path: '',
     redirectTo: 'produto',
     pathMatch: 'full',

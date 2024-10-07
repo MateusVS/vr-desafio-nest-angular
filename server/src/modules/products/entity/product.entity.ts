@@ -22,6 +22,8 @@ export class Product {
   @Column({ type: 'bytea', nullable: true })
   image: Buffer;
 
+  imageBase64?: string;
+
   @OneToMany(() => ProductStore, (productStore) => productStore.product, {
     cascade: true,
   })

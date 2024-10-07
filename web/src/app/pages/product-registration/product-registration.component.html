@@ -2,12 +2,15 @@
   <div class="product-page-container">
     <div class="left-section">
       <products-inputs [formGroup]="form"></products-inputs>
-      <products-stores-table (productStoresChange)="onProductStoresChange($event)">
+      <products-stores-table [initialStores]="productStores" (productStoresChange)="onProductStoresChange($event)">
       </products-stores-table>
     </div>
 
     <div class="image-section">
-      <image-upload (imageChange)="onImageChange($event)"></image-upload>
+      <image-upload
+        [initialImage]="imageBuffer"
+        (imageChange)="onImageChange($event)"
+      ></image-upload>
     </div>
   </div>
 </form>

@@ -9,7 +9,8 @@ import { ApiService } from '../../services/api.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
 import { ProductService } from '../../services/products.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Product } from '../../models/product.model';
 
 @Component({
   selector: 'product-registration',
@@ -36,6 +37,7 @@ export class ProductRegistrationComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar,
     private productService: ProductService,
     private router: Router,
+    private route: ActivatedRoute,
   ) {
     this.titleService.setTitle('Cadastro de Produto');
     this.form = this.fb.group({
@@ -49,6 +51,11 @@ export class ProductRegistrationComponent implements OnInit, OnDestroy {
     this.subscription = this.productService.submitProductForm$.subscribe(() => {
       this.onSubmit();
     });
+
+    const productId = this.route.snapshot.paramMap.get('id');
+    if (productId) {
+      this.getProductById(+productId);
+    }
   }
 
   ngOnDestroy() {
@@ -91,7 +98,7 @@ export class ProductRegistrationComponent implements OnInit, OnDestroy {
           });
 
           setTimeout(() => {
-            this.router.navigate(['/']);
+            this.router.navigate(['/produto']);
           }, 1500);
         },
         error => {
@@ -105,5 +112,52 @@ export class ProductRegistrationComponent implements OnInit, OnDestroy {
         duration: 3000
       });
     }
+  }
+
+  private getProductById(productId: number): void {
+    this.apiService.getProductById(productId).subscribe(
+      (product: Product) => {
+        this.form.patchValue({
+          id: product.id,
+          description: product.description,
+          cost: product.cost,
+        });
+
+        if (product.imageBase64) {
+          const binaryString = atob(product.imageBase64);
+
+          const utf8String = decodeURIComponent(escape(binaryString));
+
+          product.imageBase64 = utf8String;
+          this.imageBuffer = utf8String;
+        }
+
+        if (product.productStores && Array.isArray(product.productStores)) {
+          this.productStores = product.productStores.map(productStore => ({
+            id: productStore.id,
+            storeId: productStore.store.id,
+            storeDescription: productStore.store.description,
+            salePrice: productStore.salePrice
+          }));
+        }
+      },
+      error => {
+        this.snackBar.open('Erro ao carregar produto: O produto não foi localizado', 'Fechar', {
+          duration: 5000,
+        });
+
+        setTimeout(() => {
+          this.router.navigate(['/produto']);
+        }, 1000);
+      }
+    );
+  }
+
+  private arrayBufferToBase64(buffer: Uint8Array): string {
+    let binary = '';
+    buffer.forEach(byte => {
+      binary += String.fromCharCode(byte);
+    });
+    return btoa(binary);
   }
 }

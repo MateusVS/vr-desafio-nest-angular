@@ -2,20 +2,23 @@ export class Product {
   id: number;
   description: string;
   cost?: number;
-  image?: string;
-  productsStores?: any | undefined;
+  image?: any;
+  imageBase64?: string;
+  productStores?: any;
 
   constructor({
     id,
     description,
     cost,
     image,
-    productsStores
+    imageBase64,
+    productStores,
   }: Product) {
     this.id = id;
     this.description = description;
     this.cost = cost;
     this.image = image;
-    this.productsStores = productsStores;
+    this.imageBase64 = imageBase64;
+    this.productStores = productStores;
   }
 }

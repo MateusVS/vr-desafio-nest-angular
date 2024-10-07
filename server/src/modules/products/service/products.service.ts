@@ -98,6 +98,10 @@ export class ProductsService {
       throw new NotFoundException('Produto não encontrado.');
     }
 
+    if (product.image && Buffer.isBuffer(product.image)) {
+      product.imageBase64 = product.image.toString('base64');
+    }
+
     return product;
   }
 

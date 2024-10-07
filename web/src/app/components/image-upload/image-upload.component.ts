@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'image-upload',
@@ -12,7 +12,16 @@ import { Component, EventEmitter, Output } from '@angular/core';
 })
 export class ImageUploadComponent {
   @Output() imageChange = new EventEmitter<string | null>();
+
+  @Input() initialImage: string | null = null;
+
   imageUrl: string | null = null;
+
+  ngOnChanges(): void {
+    if (this.initialImage) {
+      this.imageUrl = this.initialImage;
+    }
+  }
 
   onFileChange(event: Event) {
     const input = event.target as HTMLInputElement;

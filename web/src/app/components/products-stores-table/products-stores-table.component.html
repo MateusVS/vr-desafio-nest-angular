@@ -23,7 +23,7 @@
   <ng-container matColumnDef="actions">
     <th mat-header-cell *matHeaderCellDef></th>
     <td mat-cell *matCellDef="let element" class="actions-cell">
-      <button mat-icon-button color="warn" type="button"  (click)="openDeleteConfirmationModal(element)">
+      <button mat-icon-button color="warn" type="button" (click)="openDeleteConfirmationModal(element)">
         <mat-icon>delete</mat-icon>
       </button>
       <button mat-icon-button color="primary" type="button" (click)="openProductStoreModal(element)">
