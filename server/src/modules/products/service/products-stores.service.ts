@@ -78,7 +78,7 @@ export class ProductsStoresServices {
         await this.findExistingPrice(productsStores.product.id, storeId);
       }
 
-      await this.repository.update(id, data);
+      await this.repository.update(id, { ...data, store: { id: storeId } });
 
       return this.repository.create({ ...productsStores, ...data });
     } catch (error) {

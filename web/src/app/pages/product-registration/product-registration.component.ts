@@ -11,6 +11,8 @@ import { Subscription } from 'rxjs';
 import { ProductService } from '../../services/products.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Product } from '../../models/product.model';
+import { MatDialog } from '@angular/material/dialog';
+import { DeleteConfirmationModalComponent } from '../../components/delete-confirmation-modal/delete-confirmation-modal.component';
 
 @Component({
   selector: 'product-registration',
@@ -28,7 +30,8 @@ export class ProductRegistrationComponent implements OnInit, OnDestroy {
   form: FormGroup;
   productStores: ProductStore[] = [];
   imageBuffer: string | null = null;
-  private subscription: Subscription | undefined;
+  private submitSubscription: Subscription | undefined;
+  private deleteSubscription: Subscription | undefined;
 
   constructor(
     private titleService: Title,
@@ -38,18 +41,23 @@ export class ProductRegistrationComponent implements OnInit, OnDestroy {
     private productService: ProductService,
     private router: Router,
     private route: ActivatedRoute,
+    private dialog: MatDialog,
   ) {
     this.titleService.setTitle('Cadastro de Produto');
     this.form = this.fb.group({
-      id: [],  // Campo id apenas para exibição
+      id: [],
       description: ['', Validators.required],
       cost: [null],
     });
   }
 
   ngOnInit() {
-    this.subscription = this.productService.submitProductForm$.subscribe(() => {
+    this.submitSubscription = this.productService.submitProductForm$.subscribe(() => {
       this.onSubmit();
+    });
+
+    this.deleteSubscription = this.productService.deleteProduct$.subscribe(() => {
+      this.openDeleteConfirmationModal();
     });
 
     const productId = this.route.snapshot.paramMap.get('id');
@@ -59,9 +67,51 @@ export class ProductRegistrationComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
+    if (this.submitSubscription) {
+      this.submitSubscription.unsubscribe();
     }
+    if (this.deleteSubscription) {
+      this.deleteSubscription.unsubscribe();
+    }
+  }
+
+  openDeleteConfirmationModal(): void {
+    if (!this.form.get('id')?.value) {
+      this.snackBar.open('Não é possível excluir um produto que ainda não foi salvo', 'Fechar', {
+        duration: 3000,
+      });
+      this.router.navigate(['/produto']);
+      return;
+    }
+
+    const dialogRef = this.dialog.open(DeleteConfirmationModalComponent, {
+      width: '400px',
+      data: {
+        item: {
+          id: this.form.get('id')?.value,
+          description: this.form.get('description')?.value
+        },
+        message: `Tem certeza que deseja excluir o produto "${this.form.get('description')?.value}"?`
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      if (result === true) {
+        this.apiService.deleteProduct(this.form.get('id')?.value).subscribe(
+          () => {
+            this.snackBar.open('Produto excluído com sucesso!', 'Fechar', {
+              duration: 3000,
+            });
+            this.router.navigate(['/produto']);
+          },
+          error => {
+            this.snackBar.open('Erro ao excluir produto: ' + error, 'Fechar', {
+              duration: 3000,
+            });
+          }
+        );
+      }
+    });
   }
 
   onProductStoresChange(stores: ProductStore[]) {
@@ -79,21 +129,43 @@ export class ProductRegistrationComponent implements OnInit, OnDestroy {
   onSubmit() {
     if (this.form.valid && this.productStores.length > 0) {
       const formData = this.form.value;
-      delete formData.id;  // CREATE
 
       const productData = {
         description: formData.description,
         cost: formData.cost,
         image: this.imageBuffer,
-        productsStores: this.productStores.map(store => ({
+        productStores: this.productStores.map(store => ({
           storeId: store.storeId,
           salePrice: store.salePrice
         }))
       };
 
-      this.apiService.createProduct(productData).subscribe(
+      if (!formData.id) {
+        delete formData.id;
+
+        this.apiService.createProduct(productData).subscribe(
+          response => {
+            this.snackBar.open('Produto criado com sucesso!', 'Fechar', {
+              duration: 3000
+            });
+
+            setTimeout(() => {
+              this.router.navigate(['/produto']);
+            }, 1500);
+            return;
+          },
+          error => {
+            this.snackBar.open('Erro ao criar produto: ' + error.message, 'Fechar', {
+              duration: 5000
+            });
+          }
+        );
+      }
+
+      this.apiService.updateProduct(formData.id, productData).subscribe(
         response => {
-          this.snackBar.open('Produto criado com sucesso!', 'Fechar', {
+          console.log(productData)
+          this.snackBar.open('Produto atualizado com sucesso!', 'Fechar', {
             duration: 3000
           });
 
@@ -102,7 +174,7 @@ export class ProductRegistrationComponent implements OnInit, OnDestroy {
           }, 1500);
         },
         error => {
-          this.snackBar.open('Erro ao criar produto: ' + error.message, 'Fechar', {
+          this.snackBar.open('Erro ao atualizado produto: ' + error.message, 'Fechar', {
             duration: 5000
           });
         }
@@ -151,13 +223,5 @@ export class ProductRegistrationComponent implements OnInit, OnDestroy {
         }, 1000);
       }
     );
-  }
-
-  private arrayBufferToBase64(buffer: Uint8Array): string {
-    let binary = '';
-    buffer.forEach(byte => {
-      binary += String.fromCharCode(byte);
-    });
-    return btoa(binary);
   }
 }

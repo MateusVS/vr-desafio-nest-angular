@@ -59,7 +59,8 @@ export class ActionBarComponent implements OnInit, OnDestroy {
     this.productService.triggerSubmit();
   }
 
-  excluirProduto() {
-    console.log('Excluindo produto...');
+  deleteProduct() {
+    this.productService.triggerDelete();
+
   }
 }

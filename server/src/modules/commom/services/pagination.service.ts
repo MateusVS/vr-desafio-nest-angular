@@ -12,7 +12,10 @@ export class PaginationService {
     const { page = 1, limit = 10, sortBy, order } = paginationQuery;
 
     if (sortBy) {
-      queryBuilder.orderBy(sortBy, order);
+      const mainAlias = queryBuilder.expressionMap.mainAlias?.name;
+      if (mainAlias) {
+        queryBuilder.orderBy(`${mainAlias}.${sortBy}`, order || 'ASC');
+      }
     }
 
     const skip = (page - 1) * limit;

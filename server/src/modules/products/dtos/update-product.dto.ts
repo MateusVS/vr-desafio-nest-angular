@@ -29,5 +29,5 @@ export class UpdateProductDTO {
   @ArrayMinSize(1, {
     message: 'É necessário fornecer pelo menos um registro em productsStores.',
   })
-  productsStores: UpdateProductsStoresDTO[];
+  productStores: UpdateProductsStoresDTO[];
 }

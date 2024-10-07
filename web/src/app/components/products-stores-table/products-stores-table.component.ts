@@ -101,5 +101,6 @@ export class ProductsStoresTableComponent {
 
   private deleteProductStore(productStore: ProductStore): void {
     this.dataSource = this.dataSource.filter(item => item.id !== productStore.id);
+    this.productStoresChange.emit(this.dataSource);
   }
 }

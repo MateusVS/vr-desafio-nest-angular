@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, Min } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, Min } from 'class-validator';
 
 export class UpdateProductsStoresDTO {
   @IsNumber()
@@ -9,4 +9,8 @@ export class UpdateProductsStoresDTO {
   @IsOptional()
   @Min(0, { message: 'O preço de venda deve ser maior ou igual a zero' })
   salePrice?: number;
+
+  @IsNotEmpty()
+  @IsOptional()
+  id?: number;
 }

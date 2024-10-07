@@ -41,7 +41,7 @@ export class ProductsTableComponent implements OnInit {
   totalItems: number = 0;
   pageSize: number = 10;
   currentPage: number = 0;
-  // sortField: string = 'id';
+  sortField: string = 'id';
   sortDirection: 'asc' | 'desc' = 'asc';
 
   constructor(
@@ -55,13 +55,17 @@ export class ProductsTableComponent implements OnInit {
   }
 
   loadProducts(): void {
-    const params = {
+    const params: any = {
       page: this.currentPage + 1,
       limit: this.pageSize,
-      // sortBy: this.sortField,
-      order: this.sortDirection.toUpperCase(),
-      ...this.currentFilters
     };
+
+    if (this.sortField) {
+      params.sortBy = this.sortField;
+      params.order = this.sortDirection.toUpperCase();
+    }
+
+    Object.assign(params, this.currentFilters);
 
     this.apiService.getProducts(params).subscribe(
       (response: ApiResponse<Product>) => {
@@ -70,7 +74,7 @@ export class ProductsTableComponent implements OnInit {
         this.table?.renderRows();
       },
       error => {
-        console.log(error)
+        console.error('Error loading products:', error);
         this.snackBar.open('Erro ao buscar produtos: ' + error, 'Fechar', {
           duration: 3000,
         });
@@ -85,13 +89,12 @@ export class ProductsTableComponent implements OnInit {
   }
 
   onSortChange(sort: Sort): void {
-    // this.sortField = sort.active;
+    this.sortField = sort.active;
     this.sortDirection = sort.direction as 'asc' | 'desc';
     this.loadProducts();
   }
 
   onFiltersChanged(filters: any): void {
-    console.log(filters)
     this.currentFilters = filters;
     this.currentPage = 0;
     if (this.paginator) {

@@ -46,6 +46,10 @@ export class ApiService {
     return this.http.post<Product>(`${this.baseUrl}/products`, productData);
   }
 
+  updateProduct(productId: number, productData: any): Observable<Product> {
+    return this.http.put<Product>(`${this.baseUrl}/products/${productId}`, productData);
+  }
+
   deleteProduct(productId: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/products/${productId}`);
   }

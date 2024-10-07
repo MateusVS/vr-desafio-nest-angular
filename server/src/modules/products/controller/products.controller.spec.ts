@@ -9,7 +9,7 @@ import { UpdateProductDTO } from '../dtos/update-product.dto';
 import { ProductFilterDTO } from '../dtos/products-filter.dto';
 import {
   PaginationQueryDTO,
-  Order,
+  OrderDirection,
 } from '../../commom/dto/pagination-query.dto';
 import { PaginatedResponse } from '../../commom/interfaces/paginated-response.interface';
 import { Product } from '../entity/product.entity';
@@ -54,7 +54,7 @@ describe('ProductsController', () => {
         page: 1,
         limit: 10,
         sortBy: 'description',
-        order: Order.ASC,
+        order: OrderDirection.ASC,
       };
       const expectedResponse: PaginatedResponse<Product> = {
         items: [mockProduct],
@@ -64,7 +64,7 @@ describe('ProductsController', () => {
           currentPage: 1,
           totalPages: 1,
           sortBy: 'description',
-          order: Order.ASC,
+          order: OrderDirection.ASC,
         },
       };
 
@@ -112,7 +112,7 @@ describe('ProductsController', () => {
       const updateProductDTO: UpdateProductDTO = {
         description: 'Updated Product',
         cost: 120.0,
-        productsStores: [
+        productStores: [
           {
             storeId: 1,
             salePrice: 150.0,

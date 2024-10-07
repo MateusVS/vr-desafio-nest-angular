@@ -1,18 +1,22 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaginationService } from './pagination.service';
 import { SelectQueryBuilder } from 'typeorm';
-import { PaginationQueryDTO, Order } from '../dto/pagination-query.dto';
-
-type MockQueryBuilder = Partial<
-  Record<keyof SelectQueryBuilder<any>, jest.Mock>
->;
+import {
+  PaginationQueryDTO,
+  OrderDirection,
+} from '../dto/pagination-query.dto';
 
 describe('PaginationService', () => {
   let service: PaginationService;
-  let mockQueryBuilder: MockQueryBuilder;
+  let mockQueryBuilder: any;
 
   beforeEach(async () => {
     mockQueryBuilder = {
+      expressionMap: {
+        mainAlias: {
+          name: 'entity',
+        },
+      },
       orderBy: jest.fn().mockReturnThis(),
       take: jest.fn().mockReturnThis(),
       skip: jest.fn().mockReturnThis(),
@@ -50,6 +54,8 @@ describe('PaginationService', () => {
           itemsPerPage: 10,
           currentPage: 1,
           totalPages: 1,
+          sortBy: undefined,
+          order: undefined,
         },
       });
     });
@@ -77,6 +83,8 @@ describe('PaginationService', () => {
           itemsPerPage: 5,
           currentPage: 2,
           totalPages: 3,
+          sortBy: undefined,
+          order: undefined,
         },
       });
     });
@@ -84,7 +92,7 @@ describe('PaginationService', () => {
     it('should handle sorting', async () => {
       const paginationQuery: PaginationQueryDTO = {
         sortBy: 'name',
-        order: Order.DESC,
+        order: OrderDirection.DESC,
       };
       const items = [
         { id: 1, name: 'Z' },
@@ -92,12 +100,33 @@ describe('PaginationService', () => {
       ];
       mockQueryBuilder.getManyAndCount.mockResolvedValue([items, 2]);
 
+      const result = await service.paginate(
+        mockQueryBuilder as unknown as SelectQueryBuilder<any>,
+        paginationQuery,
+      );
+
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'entity.name',
+        OrderDirection.DESC,
+      );
+      expect(result.meta.sortBy).toBe('name');
+      expect(result.meta.order).toBe(OrderDirection.DESC);
+    });
+
+    it('should not apply sorting when mainAlias is undefined', async () => {
+      mockQueryBuilder.expressionMap.mainAlias = undefined;
+
+      const paginationQuery: PaginationQueryDTO = {
+        sortBy: 'name',
+        order: OrderDirection.DESC,
+      };
+
       await service.paginate(
         mockQueryBuilder as unknown as SelectQueryBuilder<any>,
         paginationQuery,
       );
 
-      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('name', Order.DESC);
+      expect(mockQueryBuilder.orderBy).not.toHaveBeenCalled();
     });
 
     it('should calculate total pages correctly', async () => {
@@ -111,6 +140,14 @@ describe('PaginationService', () => {
       );
 
       expect(result.meta.totalPages).toBe(5);
+      expect(result.meta).toEqual({
+        totalItems: 21,
+        itemsPerPage: 5,
+        currentPage: 1,
+        totalPages: 5,
+        sortBy: undefined,
+        order: undefined,
+      });
     });
   });
 });

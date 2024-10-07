@@ -1,27 +1,24 @@
-import { IsEnum, IsInt, IsNumber, IsOptional, Min } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export enum Order {
+export enum OrderDirection {
   ASC = 'ASC',
   DESC = 'DESC',
 }
 
 export class PaginationQueryDTO {
-  @IsOptional()
   @IsNumber()
-  @IsInt()
-  @Min(1)
-  page?: number = 1;
-
   @IsOptional()
-  @IsNumber()
-  @IsInt()
-  @Min(1)
-  limit?: number = 10;
+  page?: number;
 
+  @IsNumber()
+  @IsOptional()
+  limit?: number;
+
+  @IsString()
   @IsOptional()
   sortBy?: string;
 
+  @IsEnum(OrderDirection)
   @IsOptional()
-  @IsEnum(Order)
-  order?: Order = Order.ASC;
+  order?: OrderDirection;
 }

@@ -85,7 +85,7 @@ export class ProductsService {
       ),
     );
 
-    return this.findProductById(savedProduct.id);
+    return await this.findProductById(savedProduct.id);
   }
 
   async findProductById(id: number): Promise<Product> {
@@ -109,22 +109,23 @@ export class ProductsService {
     const product = await this.findProductById(id);
 
     const updatedData: Partial<Product> = {
-      ...data,
+      description: data.description,
+      cost: data.cost,
       image: data.image ? Buffer.from(data.image) : product.image,
     };
 
     await this.repository.update(id, updatedData);
 
-    if (data.productsStores !== undefined) {
-      if (data.productsStores.length === 0) {
+    if (data.productStores !== undefined) {
+      if (data.productStores.length === 0) {
         throw new BadRequestException(
           'Não é possível remover todos os preços das lojas. Pelo menos um deve permanecer.',
         );
       }
-      await this.updateProductStores(id, data.productsStores);
+      await this.updateProductStores(id, data.productStores);
     }
 
-    return this.findProductById(id);
+    return await this.findProductById(id);
   }
 
   async deleteProduct(id: number): Promise<void> {
@@ -151,11 +152,15 @@ export class ProductsService {
       .filter(({ store }) => newProductsStoresMap.has(store.id))
       .map(({ id, salePrice, store }) => {
         const newStore = newProductsStoresMap.get(store.id)!;
-        return newStore.salePrice !== salePrice
-          ? { id, salePrice: newStore.salePrice }
+        return newStore.salePrice !== salePrice || newStore.storeId !== store.id
+          ? { id, salePrice: newStore.salePrice, storeId: newStore.storeId }
           : null;
       })
-      .filter(Boolean) as Array<{ id: number; salePrice: number }>;
+      .filter(Boolean) as Array<{
+      id: number;
+      salePrice: number;
+      storeId: number;
+    }>;
 
     const storesToRemove = existingProductsStores
       .filter(({ store }) => !newProductsStoresMap.has(store.id))
@@ -166,8 +171,11 @@ export class ProductsService {
       .map(({ storeId, salePrice }) => ({ storeId, salePrice }));
 
     await Promise.all([
-      ...storesToUpdate.map(({ id, salePrice }) =>
-        this.productsStoresService.updateProductsStores(id, { salePrice }),
+      ...storesToUpdate.map(({ id, salePrice, storeId }) =>
+        this.productsStoresService.updateProductsStores(id, {
+          salePrice,
+          storeId,
+        }),
       ),
       ...storesToRemove.map((id) =>
         this.productsStoresService.removeProductStore(id),

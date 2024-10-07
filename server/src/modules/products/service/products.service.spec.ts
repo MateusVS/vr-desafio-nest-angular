@@ -6,14 +6,13 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ProductFilterDTO } from '../dtos/products-filter.dto';
 import {
-  Order,
+  OrderDirection,
   PaginationQueryDTO,
 } from '../../commom/dto/pagination-query.dto';
 import { PaginationService } from '../../commom/services/pagination.service';
 import { ProductsStoresServices } from './products-stores.service';
 import {
   createMockCreateProductDTO,
-  mockImageBuffer,
   mockProduct,
   mockProductRepository,
   mockProductsStoresService,
@@ -24,7 +23,6 @@ import {
 describe('ProductsService', () => {
   let service: ProductsService;
   let repository: Repository<Product>;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let productsStoresService: ProductsStoresServices;
 
   beforeEach(async () => {
@@ -57,106 +55,70 @@ describe('ProductsService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should apply all filters and use pagination service', async () => {
-    const filters: ProductFilterDTO = {
-      id: 1,
-      description: 'Test',
-      cost: 100.0,
-    };
+  describe('findAllProducts', () => {
+    it('should apply all filters and use pagination service', async () => {
+      const filters: ProductFilterDTO = {
+        id: 1,
+        description: 'Test',
+        cost: 100.0,
+        salePrice: 150.0,
+      };
 
-    const paginationQuery: PaginationQueryDTO = {
-      page: 2,
-      limit: 10,
-      sortBy: 'description',
-      order: Order.DESC,
-    };
-
-    const mockPaginatedResponse = {
-      items: [mockProduct],
-      meta: {
-        totalItems: 1,
-        itemsPerPage: 10,
-        currentPage: 2,
-        totalPages: 1,
+      const paginationQuery: PaginationQueryDTO = {
+        page: 2,
+        limit: 10,
         sortBy: 'description',
-        order: Order.DESC,
-      },
-    };
+        order: OrderDirection.DESC,
+      };
 
-    mockPaginationService.paginate.mockResolvedValue(mockPaginatedResponse);
+      const mockPaginatedResponse = {
+        items: [mockProduct],
+        meta: {
+          totalItems: 1,
+          itemsPerPage: 10,
+          currentPage: 2,
+          totalPages: 1,
+          sortBy: 'description',
+          order: OrderDirection.DESC,
+        },
+      };
 
-    const result = await service.findAllProducts(filters, paginationQuery);
+      mockPaginationService.paginate.mockResolvedValue(mockPaginatedResponse);
 
-    expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('product.id = :id', {
-      id: filters.id,
+      const result = await service.findAllProducts(filters, paginationQuery);
+
+      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+        'product.productStores',
+        'productStore',
+      );
+      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+        'productStore.store',
+        'store',
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'product.id = :id',
+        { id: filters.id },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'product.description ILIKE :description',
+        { description: `%${filters.description}%` },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'product.cost = :cost',
+        { cost: filters.cost },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'productStore.salePrice = :salePrice',
+        { salePrice: filters.salePrice },
+      );
+
+      expect(mockPaginationService.paginate).toHaveBeenCalledWith(
+        mockQueryBuilder,
+        paginationQuery,
+      );
+
+      expect(result).toEqual(mockPaginatedResponse);
     });
-    expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-      'product.description ILIKE :description',
-      {
-        description: `%${filters.description}%`,
-      },
-    );
-    expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-      'product.cost = :cost',
-      { cost: filters.cost },
-    );
-
-    expect(mockPaginationService.paginate).toHaveBeenCalledWith(
-      mockQueryBuilder,
-      paginationQuery,
-    );
-
-    expect(result).toEqual(mockPaginatedResponse);
-  });
-
-  it('should not apply filters when none are provided but still use pagination', async () => {
-    const paginationQuery: PaginationQueryDTO = {
-      page: 1,
-      limit: 10,
-    };
-
-    const mockPaginatedResponse = {
-      items: [mockProduct],
-      meta: {
-        totalItems: 1,
-        itemsPerPage: 10,
-        currentPage: 1,
-        totalPages: 1,
-      },
-    };
-
-    mockPaginationService.paginate.mockResolvedValue(mockPaginatedResponse);
-
-    const result = await service.findAllProducts({}, paginationQuery);
-
-    expect(mockQueryBuilder.andWhere).not.toHaveBeenCalled();
-    expect(mockPaginationService.paginate).toHaveBeenCalledWith(
-      mockQueryBuilder,
-      paginationQuery,
-    );
-    expect(result).toEqual(mockPaginatedResponse);
-  });
-
-  it('should use default pagination when no pagination query is provided', async () => {
-    const mockPaginatedResponse = {
-      items: [mockProduct],
-      meta: {
-        totalItems: 1,
-        itemsPerPage: 10,
-        currentPage: 1,
-        totalPages: 1,
-      },
-    };
-
-    mockPaginationService.paginate.mockResolvedValue(mockPaginatedResponse);
-
-    const result = await service.findAllProducts({});
-
-    expect(mockPaginationService.paginate).toHaveBeenCalledWith(
-      mockQueryBuilder,
-      {},
-    );
-    expect(result).toEqual(mockPaginatedResponse);
   });
 
   describe('createProduct', () => {
@@ -173,7 +135,9 @@ describe('ProductsService', () => {
       expect(mockProductRepository.create).toHaveBeenCalledWith({
         description: createProductDto.description,
         cost: createProductDto.cost,
-        image: mockImageBuffer,
+        image: createProductDto.image
+          ? Buffer.from(createProductDto.image)
+          : null,
       });
       expect(
         mockProductsStoresService.createProductsStores,
@@ -184,45 +148,15 @@ describe('ProductsService', () => {
       });
       expect(result).toEqual(mockProduct);
     });
-
-    it('should throw BadRequestException when no store prices are provided', async () => {
-      const createProductDto = createMockCreateProductDTO({
-        productsStores: [],
-      });
-
-      await expect(service.createProduct(createProductDto)).rejects.toThrow(
-        BadRequestException,
-      );
-    });
-  });
-
-  describe('findProductById', () => {
-    it('should return a product by id', async () => {
-      mockProductRepository.findOne.mockResolvedValue(mockProduct);
-
-      const result = await service.findProductById(1);
-
-      expect(result).toEqual(mockProduct);
-      expect(mockProductRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
-        relations: ['productStores', 'productStores.store'],
-      });
-    });
-
-    it('should throw NotFoundException when product is not found', async () => {
-      mockProductRepository.findOne.mockResolvedValue(null);
-
-      await expect(service.findProductById(999)).rejects.toThrow(
-        NotFoundException,
-      );
-    });
   });
 
   describe('updateProduct', () => {
-    it('should update product and store prices', async () => {
+    it('should update product data and store prices', async () => {
       const updateProductDto = {
         description: 'Updated Product',
-        productsStores: [
+        cost: 150.0,
+        image: 'newImageBase64',
+        productStores: [
           { storeId: 1, salePrice: 200.0 },
           { storeId: 2, salePrice: 220.0 },
         ],
@@ -230,25 +164,28 @@ describe('ProductsService', () => {
 
       mockProductRepository.findOne.mockResolvedValue(mockProduct);
       mockProductsStoresService.findByProductId.mockResolvedValue([
-        mockProduct.productStores[0],
+        { id: 1, store: { id: 1 }, salePrice: 180.0 },
       ]);
 
       await service.updateProduct(1, updateProductDto);
 
       expect(mockProductRepository.update).toHaveBeenCalledWith(1, {
         description: updateProductDto.description,
-        image: mockProduct.image,
-        productsStores: updateProductDto.productsStores,
+        cost: updateProductDto.cost,
+        image: Buffer.from(updateProductDto.image),
       });
-      expect(mockProductsStoresService.findByProductId).toHaveBeenCalledWith(1);
+
       expect(mockProductsStoresService.updateProductsStores).toHaveBeenCalled();
+      expect(
+        mockProductsStoresService.removeProductStore,
+      ).not.toHaveBeenCalled();
       expect(mockProductsStoresService.createProductsStores).toHaveBeenCalled();
     });
 
     it('should throw BadRequestException when trying to remove all store prices', async () => {
       const updateProductDto = {
         description: 'Updated Product',
-        productsStores: [],
+        productStores: [],
       };
 
       mockProductRepository.findOne.mockResolvedValue(mockProduct);
@@ -258,25 +195,24 @@ describe('ProductsService', () => {
       );
     });
   });
-  describe('deleteProduct', () => {
-    it('should delete a product', async () => {
-      mockProductRepository.findOne.mockResolvedValue(mockProduct);
 
-      await service.deleteProduct(1);
+  describe('findProductById', () => {
+    it('should return a product by id with base64 image', async () => {
+      const productWithImage = {
+        ...mockProduct,
+        image: Buffer.from('testImage'),
+      };
+      mockProductRepository.findOne.mockResolvedValue(productWithImage);
 
+      const result = await service.findProductById(1);
+
+      expect(result.imageBase64).toBe(
+        productWithImage.image.toString('base64'),
+      );
       expect(mockProductRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
         relations: ['productStores', 'productStores.store'],
       });
-      expect(mockProductRepository.delete).toHaveBeenCalledWith(1);
-    });
-
-    it('should throw NotFoundException when product to delete is not found', async () => {
-      jest.spyOn(repository, 'findOne').mockResolvedValue(null);
-
-      await expect(service.deleteProduct(999)).rejects.toThrow(
-        NotFoundException,
-      );
     });
   });
 

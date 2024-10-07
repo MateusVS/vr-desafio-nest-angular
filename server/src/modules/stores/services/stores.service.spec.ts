@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { StoresService } from './stores.service';
 import { Store } from '../entity/store.entity';
 import { PaginationService } from '../../commom/services/pagination.service';
-import { NotFoundException } from '@nestjs/common';
 import {
   mockStore,
   mockStoreRepository,
@@ -76,11 +75,16 @@ describe('StoresService', () => {
 
       mockPaginationService.paginate.mockResolvedValue(expectedResult);
 
-      const result = await service.findAllStores(numericFilter, paginationQuery);
+      const result = await service.findAllStores(
+        numericFilter,
+        paginationQuery,
+      );
 
       expect(result).toEqual(expectedResult);
       expect(repository.createQueryBuilder).toHaveBeenCalledWith('store');
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('store.id = :id', { id: 1 });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('store.id = :id', {
+        id: 1,
+      });
     });
 
     it('should return filtered paginated stores with text filter', async () => {
@@ -175,7 +179,9 @@ describe('StoresService', () => {
     it('should throw NotFoundException if store to delete not found', async () => {
       mockStoreRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.deleteStore(999)).rejects.toThrow('Loja não encontrada');
+      await expect(service.deleteStore(999)).rejects.toThrow(
+        'Loja não encontrada',
+      );
     });
   });
 });
